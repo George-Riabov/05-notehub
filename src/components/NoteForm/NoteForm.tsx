@@ -22,9 +22,10 @@ interface NoteFormProps {
 
 const validationSchema = Yup.object({
   title: Yup.string()
-    .required("Title is required")
-    .max(100, "Max 100 characters"),
-  content: Yup.string().max(500, "Max 500 characters").notRequired(),
+    .min(3, "Min 3 characters")
+    .max(50, "Max 50 characters")
+    .required("Title is required"),
+  content: Yup.string().max(500, "Max 500 characters"),
   tag: Yup.mixed<NoteTag>()
     .oneOf(TAGS, "Invalid tag")
     .required("Tag is required"),
@@ -45,32 +46,39 @@ export default function NoteForm({ onCancel }: NoteFormProps) {
     },
   });
 
+  const initialValues: FormValues = {
+    title: "",
+    content: "",
+    tag: "Todo",
+  };
+
   return (
     <Formik<FormValues>
-      initialValues={{
-        title: "",
-        content: "",
-        tag: "Todo",
-      }}
+      initialValues={initialValues}
       validationSchema={validationSchema}
       onSubmit={(values) => mutation.mutate(values)}
     >
       <Form className={css.form}>
         <label className={css.label}>
           Title
-          <Field name="title" className={css.input} />
+          <Field name="title" type="text" className={css.input} />
           <ErrorMessage name="title" component="span" className={css.error} />
         </label>
 
         <label className={css.label}>
           Content
-          <Field as="textarea" name="content" className={css.textarea} />
+          <Field
+            name="content"
+            as="textarea"
+            rows={5}
+            className={css.textarea}
+          />
           <ErrorMessage name="content" component="span" className={css.error} />
         </label>
 
         <label className={css.label}>
           Tag
-          <Field as="select" name="tag" className={css.select}>
+          <Field name="tag" as="select" className={css.select}>
             {TAGS.map((tag) => (
               <option key={tag} value={tag}>
                 {tag}
@@ -84,7 +92,6 @@ export default function NoteForm({ onCancel }: NoteFormProps) {
           <button type="button" className={css.cancel} onClick={onCancel}>
             Cancel
           </button>
-
           <button
             type="submit"
             className={css.submit}
